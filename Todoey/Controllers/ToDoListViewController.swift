@@ -26,7 +26,7 @@ class ToDoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+//         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
 
     }
     
@@ -75,7 +75,6 @@ class ToDoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
 
             let newItem = Item(context: self.context)
-            
             newItem.title = textField.text! 
             newItem.done = false
             newItem.parentCategory = self.selectedCategory

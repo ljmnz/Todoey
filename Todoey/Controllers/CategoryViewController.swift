@@ -52,6 +52,7 @@ class CategoryViewController: UITableViewController {
         
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.navigationItem.title = categoryArray[indexPath.row].name
         }
     }
     
