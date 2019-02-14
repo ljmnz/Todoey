@@ -10,7 +10,7 @@ import UIKit
 import RealmSwift
 import SwipeCellKit
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeViewController {
     
     let realm = try! Realm()
     var todoItems: Results<Item>?
@@ -19,26 +19,25 @@ class ToDoListViewController: UITableViewController {
             loadItems()
         }
     }
-
-
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-
+                // print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
     }
-    
     
     
     //MARK: - TableView Datasource Methods
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return todoItems?.count ?? 1
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
@@ -48,6 +47,7 @@ class ToDoListViewController: UITableViewController {
         }
         return cell
     }
+    
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
@@ -74,14 +74,14 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add new Todoey", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
-
+            
             if let currentCategory = self.selectedCategory {
                 do {
                     try self.realm.write {
-                    let newItem = Item()
-                    newItem.title = textField.text!
-                    newItem.dateCreated = Date()
-                    currentCategory.items.append(newItem)
+                        let newItem = Item()
+                        newItem.title = textField.text!
+                        newItem.dateCreated = Date()
+                        currentCategory.items.append(newItem)
                     } 
                 } catch {
                     print("Error writing items \(error)")
@@ -108,29 +108,43 @@ class ToDoListViewController: UITableViewController {
         todoItems = selectedCategory?.items.sorted(byKeyPath: "dateCreated", ascending: false)
         tableView.reloadData()
     }
+   
+    // MARK: - Delete from Swipe
     
+    override func updateModel(at indexpath: IndexPath) {
+        
+        if let itemToDelete = self.todoItems?[indexpath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(itemToDelete)
+                }
+            } catch {
+                print("error deleting item \(error)")
+            }
+        }
+    }
 }
+
 
 
 //MARK: - Search Bar Methods
 
 extension ToDoListViewController: UISearchBarDelegate {
-
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
         todoItems = todoItems?.filter("title CONTAINS[cd] %@",searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: false)
         tableView.reloadData()
     }
-
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchBar.text?.count == 0 {
             loadItems()
-
+            
             DispatchQueue.main.async {
                 searchBar.resignFirstResponder()
             }
         }
     }
-
+    
 }
-

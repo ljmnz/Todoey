@@ -8,30 +8,33 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
 
 
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeViewController {
     
     let realm = try! Realm()
     var categoryArray: Results<Category>?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         loadCategories()
 
+        
     }
-
+    
     //MARK: - TableView Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return categoryArray?.count ?? 1
     }
     
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No categories created yet."
         
@@ -76,6 +79,23 @@ class CategoryViewController: UITableViewController {
     }
     
     
+    //Mark: - Delete data from Swipe
+    
+    override func updateModel(at indexpath: IndexPath) {
+        if let categoryToDelete = self.categoryArray?[indexpath.row] {
+            
+            do {
+                try self.realm.write {
+                    self.realm.delete(categoryToDelete)
+                }
+            } catch {
+                print("error deleting category \(error)")
+            }
+        }
+    }
+    
+    
+    
     
     //MARK: - Add New Categories
     
@@ -90,7 +110,7 @@ class CategoryViewController: UITableViewController {
             let newCategory = Category()
             
             newCategory.name = textField.text!
-
+            
             self.save(category: newCategory)
         }
         
@@ -105,7 +125,12 @@ class CategoryViewController: UITableViewController {
         
     }
     
-
-
+    
+    
     
 }
+
+//MARK: - Swipe Cell Delegate Methods
+
+
+
